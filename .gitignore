@@ -1,0 +1,9 @@
+node_modules/
+client/build/
+.env
+*.h5
+__pycache__/
+*.pyc
+captures/*.jpg
+captures/*.png
+*.log

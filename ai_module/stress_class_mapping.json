@@ -1,0 +1,9 @@
+{
+  "classes": {
+    "0": "Low",
+    "1": "High"
+  },
+  "type": "stress",
+  "model": "VGG16",
+  "input_size": 224
+}
