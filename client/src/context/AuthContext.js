@@ -1,28 +1,61 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+
 const AuthContext = createContext();
+
+// ✅ IMPORTANT: API URL
+const API = process.env.REACT_APP_API_URL;
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      axios.get('/api/auth/me').then(r => setUser(r.data.user)).catch(() => logout()).finally(() => setLoading(false));
-    } else { setLoading(false); }
+
+      // ✅ FIXED API CALL
+      axios.get(`${API}/api/auth/me`)
+        .then(r => setUser(r.data.user))
+        .catch(() => logout())
+        .finally(() => setLoading(false));
+
+    } else {
+      setLoading(false);
+    }
   }, [token]);
+
   const login = async (username, password) => {
-    const res = await axios.post('/api/auth/login', { username, password });
+    // ✅ FIXED API CALL
+    const res = await axios.post(`${API}/api/auth/login`, {
+      username,
+      password
+    });
+
     const { token: t, user: u } = res.data;
+
     localStorage.setItem('token', t);
     axios.defaults.headers.common['Authorization'] = `Bearer ${t}`;
-    setToken(t); setUser(u); return u;
+
+    setToken(t);
+    setUser(u);
+
+    return u;
   };
+
   const logout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
-    setToken(null); setUser(null);
+    setToken(null);
+    setUser(null);
   };
-  return React.createElement(AuthContext.Provider, { value: { user, token, loading, login, logout } }, children);
+
+  return (
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
+
 export const useAuth = () => useContext(AuthContext);
